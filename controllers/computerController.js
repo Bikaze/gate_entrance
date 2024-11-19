@@ -1,14 +1,13 @@
-// controllers/computerController.js
 const Computer = require('../models/computer');
 const User = require('../models/user');
 const QRCode = require('../models/qrcode');
-const { validateComputerRegistration, validateComputerUpdate } = require('../utils/validation');
+const { validateComputer } = require('../utils/validation');
 
 exports.registerComputer = async (req, res) => {
   const { registrationId } = req.params;
   const { regNo, serialNo, brand } = req.body;
 
-  const validationError = validateComputerRegistration(req.body);
+  const validationError = validateComputer(req.body);
   if (validationError) {
     return res.status(400).json({ error: validationError });
   }
@@ -37,7 +36,8 @@ exports.registerComputer = async (req, res) => {
 
     res.status(201).json({ message: 'Computer registered successfully', registrationId });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error registering computer:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -45,7 +45,7 @@ exports.updateComputer = async (req, res) => {
   const { registrationId } = req.params;
   const { regNo, serialNo, brand } = req.body;
 
-  const validationError = validateComputerUpdate(req.body);
+  const validationError = validateComputer(req.body);
   if (validationError) {
     return res.status(400).json({ error: validationError });
   }
@@ -62,8 +62,8 @@ exports.updateComputer = async (req, res) => {
     }
 
     const computer = await Computer.findOneAndUpdate(
-      { registrationId },
       { serialNo, brand, owner: user._id },
+      { registrationId },
       { new: true }
     );
 
@@ -76,7 +76,8 @@ exports.updateComputer = async (req, res) => {
 
     res.status(200).json({ registrationId });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error updating computer:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -97,7 +98,8 @@ exports.verifyComputer = async (req, res) => {
       serialNo: computer.serialNo
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error verifying computer:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -123,7 +125,8 @@ exports.searchComputers = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error searching computers:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 

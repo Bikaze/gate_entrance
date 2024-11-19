@@ -1,30 +1,18 @@
 const { z } = require('zod');
 
-const computerRegistrationSchema = z.object({
+const computerSchema = z.object({
   regNo: z.number().optional(),
   nationalId: z.number().optional(),
-  serialNo: z.string().nonempty(),
-  brand: z.string().nonempty()
-});
-
-const computerUpdateSchema = z.object({
-  regNo: z.number().optional(),
-  nationalId: z.number().optional(),
-  serialNo: z.string().nonempty(),
-  brand: z.string().nonempty()
+  serialNo: z.string().min(1, { message: "serialNo cannot be empty" }),
+  brand: z.string().min(1, { message: "brand cannot be empty" })
 });
 
 const qrCodeGenerationSchema = z.object({
-  count: z.number().int().positive().max(1000)
+  count: z.number().int().positive().max(1000, { message: "count must be between 1 and 1000" })
 });
 
-exports.validateComputerRegistration = (data) => {
-  const result = computerRegistrationSchema.safeParse(data);
-  return result.success ? null : result.error.errors.map(e => e.message).join(', ');
-};
-
-exports.validateComputerUpdate = (data) => {
-  const result = computerUpdateSchema.safeParse(data);
+exports.validateComputer = (data) => {
+  const result = computerSchema.safeParse(data);
   return result.success ? null : result.error.errors.map(e => e.message).join(', ');
 };
 

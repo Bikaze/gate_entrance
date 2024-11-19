@@ -7,7 +7,7 @@ exports.generateQRCodes = async (req, res) => {
 
   const validationError = validateQRCodeGeneration(req.body);
   if (validationError) {
-    return res.status(400).json({ error: validationError });
+    return res.status(400).json({ error: "Invalid count! " + validationError });
   }
 
   try {
