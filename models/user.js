@@ -2,38 +2,22 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  regNo: { 
-    type: Number, 
-    sparse: true,
-    unique: true
-  },
-  nationalId: { 
-    type: Number, 
-    sparse: true,
-    unique: true
-  },
-  name: { 
-    type: String, 
-    required: true 
-  },
-  photo: { 
-    type: String, 
-    required: true 
-  },
-  type: { 
-    type: String, 
-    enum: ['student', 'guest'], 
-    required: true 
-  }
+  regNo: { type: Number, sparse: true, unique: true },
+  nationalId: { type: Number, sparse: true, unique: true },
+  name: { type: String, required: true },
+  photo: { type: String, required: true }, // Store photo as Base64 string
+  type: { type: String, enum: ['student', 'guest'], required: true }
 }, { timestamps: true });
 
-// Ensure either regNo or nationalId is present based on type
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   if (this.type === 'student' && !this.regNo) {
     next(new Error('Student must have regNo'));
   }
   if (this.type === 'guest' && !this.nationalId) {
     next(new Error('Guest must have nationalId'));
+  }
+  if (this.regNo && this.nationalId) {
+    next(new Error('User cannot have both regNo and nationalId'));
   }
   next();
 });
