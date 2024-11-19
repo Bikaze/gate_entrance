@@ -1,4 +1,3 @@
-// computers.test.js
 const mongoose = require('mongoose');
 const request = require('supertest');
 const crypto = require('crypto');
@@ -7,6 +6,7 @@ const app = require('../../index');
 const Computer = require('../../models/computer');
 const User = require('../../models/user');
 const QRCode = require('../../models/qrcode');
+const { connectDB, disconnectDB } = require('../../config/db');
 
 let mongoServer;
 const generateValidQRCode = () => crypto.randomBytes(32).toString('hex');
@@ -14,11 +14,11 @@ const generateValidQRCode = () => crypto.randomBytes(32).toString('hex');
 describe('Computer Registration System', () => {
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
+    await connectDB(mongoServer.getUri());
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
+    await disconnectDB();
     await mongoServer.stop();
   });
 
@@ -36,7 +36,7 @@ describe('Computer Registration System', () => {
     beforeEach(async () => {
       validQRCode = generateValidQRCode();
       await QRCode.create({ code: validQRCode, isUsed: false });
-      
+
       [testUser, testGuest] = await Promise.all([
         User.create({
           regNo: 12345,
@@ -110,7 +110,8 @@ describe('Computer Registration System', () => {
       const user = await User.create({
         regNo: 12345,
         name: 'Test Student',
-        photo: 'http://example.com/photo.jpg'
+        photo: 'http://example.com/photo.jpg',
+        type: 'student'
       });
 
       const registrationId = generateValidQRCode();
@@ -139,6 +140,7 @@ describe('Computer Registration System', () => {
       const user = await User.create({
         regNo: 12345,
         name: 'Test Student',
+        photo: 'http://example.com/photo.jpg',
         type: 'student'
       });
 
@@ -174,6 +176,7 @@ describe('Computer Registration System', () => {
       const guest = await User.create({
         nationalId: 98765432,
         name: 'Test Guest',
+        photo: 'http://example.com/guest.jpg',
         type: 'guest'
       });
 
@@ -197,15 +200,13 @@ describe('Computer Registration System', () => {
     let validQRCode, existingUser, existingComputer;
 
     beforeEach(async () => {
-      // Reuse testUser if available from parent scope, otherwise create new
-      existingUser = testUser || await User.create({
+      existingUser = await User.create({
         regNo: 12345,
         name: 'Test Student',
         photo: 'http://example.com/photo.jpg',
         type: 'student'
       });
 
-      // Create initial computer registration
       const initialQRCode = generateValidQRCode();
       existingComputer = await Computer.create({
         registrationId: initialQRCode,
@@ -214,12 +215,8 @@ describe('Computer Registration System', () => {
         owner: existingUser._id
       });
 
-      // Create new unused QR code for update
       validQRCode = generateValidQRCode();
-      await QRCode.create({
-        code: validQRCode,
-        isUsed: false
-      });
+      await QRCode.create({ code: validQRCode, isUsed: false });
     });
 
     it('should update computer registration with valid data', async () => {
@@ -252,9 +249,10 @@ describe('Computer Registration System', () => {
     });
 
     it('should handle guest computer updates', async () => {
-      const guest = testGuest || await User.create({
+      const guest = await User.create({
         nationalId: 98765432,
         name: 'Test Guest',
+        photo: 'http://example.com/guest.jpg',
         type: 'guest'
       });
 
