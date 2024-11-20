@@ -77,7 +77,7 @@ The Computer Registration API is designed to manage the registration and verific
 
 ```sh
 git clone https://github.com/Bikaze/gate_entrance.git
-cd computer-registration-api
+cd gate_entrance
 ```
 
 2. Install dependencies:
@@ -89,8 +89,8 @@ npm install
 3. Create a `.env` file in the root directory and add the following environment variables:
 
 ```
-MONGO_URI=your_mongodb_uri
-PORT=3000
+MONGO_URI=your_mongodb_uri(e.g mongodb://localhost:27017/gate_entrance)
+BASE_URL=http://localhost:3000
 ```
 
 ### Running the Application
