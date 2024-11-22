@@ -7,6 +7,9 @@ const Computer = require('../../models/computer');
 const User = require('../../models/user');
 const QRCode = require('../../models/qrcode');
 const { connectDB, disconnectDB } = require('../../config/db');
+const dotenv = require('dotenv');
+
+dotenv.config()
 
 let mongoServer;
 const generateValidQRCode = () => crypto.randomBytes(32).toString('hex');
@@ -110,10 +113,10 @@ describe('Computer Registration System', () => {
       const user = await User.create({
         regNo: 12345,
         name: 'Test Student',
-        photo: 'http://example.com/photo.jpg',
+        photo: { data: Buffer.from('sample photo data'), contentType: 'image/jpeg' },
         type: 'student'
       });
-
+    
       const registrationId = generateValidQRCode();
       await Computer.create({
         registrationId,
@@ -121,13 +124,13 @@ describe('Computer Registration System', () => {
         brand: 'Dell',
         owner: user._id
       });
-
+    
       const response = await request(app)
         .get(`/api/computers/verify/${registrationId}`);
-
+    
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
-        photoLink: 'http://example.com/photo.jpg',
+        photoLink: `${process.env.BASE_URL}/api/photos/${user.regNo}`,
         regNo: 12345,
         names: 'Test Student',
         serialNo: 'SN123456'

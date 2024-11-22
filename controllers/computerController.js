@@ -83,8 +83,12 @@ exports.verifyComputer = async (req, res) => {
     }
 
     const { owner } = computer;
+    const photoLink = owner.regNo
+      ? `${process.env.BASE_URL}/api/photos/${owner.regNo}`
+      : `${process.env.BASE_URL}/api/photos/${owner.nationalId}`;
+
     res.status(200).json({
-      photoLink: owner.photo,
+      photoLink,
       regNo: owner.regNo,
       names: owner.name,
       serialNo: computer.serialNo

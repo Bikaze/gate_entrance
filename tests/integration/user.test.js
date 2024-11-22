@@ -31,16 +31,12 @@ describe('User CRUD Operations', () => {
 
   describe('Create User', () => {
     it('should create a student with valid data', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
-      console.log('Photo:', photo);
       const response = await request(app)
         .post('/api/users')
-        .send({
-          regNo: 12345,
-          name: 'Test Student',
-          type: 'student',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('regNo', 12345)
+        .field('name', 'Test Student')
+        .field('type', 'student')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(201);
@@ -52,15 +48,12 @@ describe('User CRUD Operations', () => {
     });
 
     it('should create a guest with valid data', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
       const response = await request(app)
         .post('/api/users')
-        .send({
-          nationalId: 98765432,
-          name: 'Test Guest',
-          type: 'guest',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('nationalId', 98765432)
+        .field('name', 'Test Guest')
+        .field('type', 'guest')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(201);
@@ -72,14 +65,11 @@ describe('User CRUD Operations', () => {
     });
 
     it('should not create a student without regNo', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
       const response = await request(app)
         .post('/api/users')
-        .send({
-          name: 'Test Student',
-          type: 'student',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('name', 'Test Student')
+        .field('type', 'student')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(400);
@@ -87,14 +77,11 @@ describe('User CRUD Operations', () => {
     });
 
     it('should not create a guest without nationalId', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
       const response = await request(app)
         .post('/api/users')
-        .send({
-          name: 'Test Guest',
-          type: 'guest',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('name', 'Test Guest')
+        .field('type', 'guest')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(400);
@@ -102,16 +89,13 @@ describe('User CRUD Operations', () => {
     });
 
     it('should not create a user with both regNo and nationalId', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
       const response = await request(app)
         .post('/api/users')
-        .send({
-          regNo: 12345,
-          nationalId: 98765432,
-          name: 'Test User',
-          type: 'student',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('regNo', 12345)
+        .field('nationalId', 98765432)
+        .field('name', 'Test User')
+        .field('type', 'student')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(400);
@@ -121,25 +105,20 @@ describe('User CRUD Operations', () => {
     it('should not create a user with missing required fields', async () => {
       const response = await request(app)
         .post('/api/users')
-        .send({
-          type: 'student'
-        });
+        .field('type', 'student');
 
       console.log('Response:', response.body);
       expect(response.status).toBe(400);
       expect(response.body.error).toMatch(/name cannot be empty/i);
-      expect(response.body.error).toMatch(/photo cannot be empty/i);
     });
 
     it('should not create a user with invalid photo format', async () => {
       const response = await request(app)
         .post('/api/users')
-        .send({
-          regNo: 12345,
-          name: 'Test Student',
-          type: 'student',
-          photo: 'invalid_base64_string'
-        });
+        .field('regNo', 12345)
+        .field('name', 'Test Student')
+        .field('type', 'student')
+        .attach('photo', 'tests/fixtures/invalid.txt');
 
       console.log('Response:', response.body);
       expect(response.status).toBe(400);
@@ -151,11 +130,11 @@ describe('User CRUD Operations', () => {
     let user;
 
     beforeEach(async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
+      const photo = fs.readFileSync(PHOTO_PATH);
       user = await User.create({
         regNo: 12345,
         name: 'Test Student',
-        photo: `data:image/jpeg;base64,${photo}`,
+        photo: { data: photo, contentType: 'image/jpeg' },
         type: 'student'
       });
     });
@@ -187,24 +166,21 @@ describe('User CRUD Operations', () => {
     let user;
 
     beforeEach(async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
+      const photo = fs.readFileSync(PHOTO_PATH);
       user = await User.create({
         regNo: 12345,
         name: 'Test Student',
-        photo: `data:image/jpeg;base64,${photo}`,
+        photo: { data: photo, contentType: 'image/jpeg' },
         type: 'student'
       });
     });
 
     it('should update a user with valid data', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
       const response = await request(app)
         .put(`/api/users/${user._id}`)
-        .send({
-          name: 'Updated Student',
-          type: 'student',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('name', 'Updated Student')
+        .field('type', 'student')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(200);
@@ -216,14 +192,11 @@ describe('User CRUD Operations', () => {
     });
 
     it('should return 404 for non-existent user', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
       const response = await request(app)
         .put(`/api/users/${new mongoose.Types.ObjectId()}`)
-        .send({
-          name: 'Updated Student',
-          type: 'student',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('name', 'Updated Student')
+        .field('type', 'student')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(404);
@@ -231,16 +204,13 @@ describe('User CRUD Operations', () => {
     });
 
     it('should not update a user with both regNo and nationalId', async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
       const response = await request(app)
         .put(`/api/users/${user._id}`)
-        .send({
-          regNo: 12345,
-          nationalId: 98765432,
-          name: 'Updated User',
-          type: 'student',
-          photo: `data:image/jpeg;base64,${photo}`
-        });
+        .field('regNo', 12345)
+        .field('nationalId', 98765432)
+        .field('name', 'Updated User')
+        .field('type', 'student')
+        .attach('photo', PHOTO_PATH);
 
       console.log('Response:', response.body);
       expect(response.status).toBe(400);
@@ -250,11 +220,9 @@ describe('User CRUD Operations', () => {
     it('should not update a user with invalid photo format', async () => {
       const response = await request(app)
         .put(`/api/users/${user._id}`)
-        .send({
-          name: 'Updated Student',
-          type: 'student',
-          photo: 'invalid_base64_string'
-        });
+        .field('name', 'Updated Student')
+        .field('type', 'student')
+        .attach('photo', 'tests/fixtures/invalid.txt');
 
       console.log('Response:', response.body);
       expect(response.status).toBe(400);
@@ -266,11 +234,11 @@ describe('User CRUD Operations', () => {
     let user;
 
     beforeEach(async () => {
-      const photo = fs.readFileSync(PHOTO_PATH, { encoding: 'base64' });
+      const photo = fs.readFileSync(PHOTO_PATH);
       user = await User.create({
         regNo: 12345,
         name: 'Test Student',
-        photo: `data:image/jpeg;base64,${photo}`,
+        photo: { data: photo, contentType: 'image/jpeg' },
         type: 'student'
       });
     });
