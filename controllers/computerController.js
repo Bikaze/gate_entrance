@@ -96,10 +96,16 @@ exports.verifyComputer = async (req, res) => {
 };
 
 exports.searchComputers = async (req, res) => {
-  const { regNo, page = 1, limit = 10 } = req.query;
+  const { regNo, nationalId, page = 1, limit = 10 } = req.query;
 
   try {
-    const user = await User.findOne({ regNo });
+    let user;
+    if (regNo) {
+      user = await User.findOne({ regNo });
+    } else if (nationalId) {
+      user = await User.findOne({ nationalId });
+    }
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
