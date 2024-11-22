@@ -13,11 +13,6 @@ exports.registerComputer = async (req, res) => {
   }
 
   try {
-    const qrCode = await QRCode.findOne({ code: registrationId, isUsed: false });
-    if (!qrCode) {
-      return res.status(400).json({ error: 'Invalid or used QR code' });
-    }
-
     const user = await User.findOne({ regNo });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -31,6 +26,7 @@ exports.registerComputer = async (req, res) => {
     const computer = new Computer({ registrationId, serialNo, brand, owner: user._id });
     await computer.save();
 
+    const qrCode = await QRCode.findOne({ code: registrationId });
     qrCode.isUsed = true;
     await qrCode.save();
 
@@ -51,11 +47,6 @@ exports.updateComputer = async (req, res) => {
   }
 
   try {
-    const qrCode = await QRCode.findOne({ code: registrationId, isUsed: false });
-    if (!qrCode) {
-      return res.status(400).json({ error: 'Invalid or used QR code' });
-    }
-
     const user = await User.findOne({ regNo });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -71,6 +62,7 @@ exports.updateComputer = async (req, res) => {
       return res.status(404).json({ error: 'Computer not found' });
     }
 
+    const qrCode = await QRCode.findOne({ code: registrationId });
     qrCode.isUsed = true;
     await qrCode.save();
 
@@ -129,7 +121,3 @@ exports.searchComputers = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-// todo: resolve vulnerabilities
-// sql-injection Unchecked input in database commands can alter intended queries
-// stack-trace-exposure Error messages or stack traces can reveal sensitive details
