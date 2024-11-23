@@ -117,11 +117,19 @@ exports.getPhoto = async (req, res) => {
     const user = await User.findOne({
       $or: [{ regNo: id }, { nationalId: id }],
     });
+
     if (!user || !user.photo) {
       return res.status(404).json({ error: "Photo not found" });
     }
 
-    res.set("Content-Type", user.photo.contentType);
+    // Extract the file extension from the contentType
+    const extension = user.photo.contentType.split('/')[1];
+    const filename = `photo.${extension}`;
+
+    // Set headers to prompt the browser to display the image
+    res.set('Content-Type', user.photo.contentType);
+    res.set('Content-Disposition', `inline; filename="${filename}"`);
+
     res.send(user.photo.data);
   } catch (error) {
     console.error("Error fetching photo:", error);
