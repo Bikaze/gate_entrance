@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 const { connectDB } = require('./config/db');
 const computerRoutes = require('./routes/computerRoutes');
@@ -5,6 +6,8 @@ const qrCodeRoutes = require('./routes/qrCodeRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 connectDB();
