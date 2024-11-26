@@ -10,8 +10,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-connectDB();
-
 app.use('/api', computerRoutes);
 app.use('/api', qrCodeRoutes);
 app.use('/api', userRoutes);
@@ -21,6 +19,7 @@ app.get('/', (req, res) => {
 });
 
 if (process.env.NODE_ENV !== 'test') {
+  connectDB();
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }

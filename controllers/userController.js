@@ -9,8 +9,6 @@ exports.createUser = async (req, res) => {
     ? { data: req.file.buffer, contentType: req.file.mimetype }
     : undefined;
 
-  console.log(photo);
-
   // Convert regNo and nationalId to numbers
   const regNoNum = regNo ? Number(regNo) : undefined;
   const nationalIdNum = nationalId ? Number(nationalId) : undefined;
@@ -41,13 +39,11 @@ exports.createUser = async (req, res) => {
     }
 
     if (existingUser) {
-      return res
-        .status(400)
-        .json({
-          error: `User with the same ${
-            type === "student" ? "regNo" : "nationalId"
-          } already exists`,
-        });
+      return res.status(400).json({
+        error: `User with the same ${
+          type === "student" ? "regNo" : "nationalId"
+        } already exists`,
+      });
     }
 
     const user = new User({
@@ -123,12 +119,12 @@ exports.getPhoto = async (req, res) => {
     }
 
     // Extract the file extension from the contentType
-    const extension = user.photo.contentType.split('/')[1];
+    const extension = user.photo.contentType.split("/")[1];
     const filename = `photo.${extension}`;
 
     // Set headers to prompt the browser to display the image
-    res.set('Content-Type', user.photo.contentType);
-    res.set('Content-Disposition', `inline; filename="${filename}"`);
+    res.set("Content-Type", user.photo.contentType);
+    res.set("Content-Disposition", `inline; filename="${filename}"`);
 
     res.send(user.photo.data);
   } catch (error) {

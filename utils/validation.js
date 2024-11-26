@@ -30,7 +30,6 @@ const userSchema = z.object({
 });
 
 exports.validateUser = (data) => {
-  console.log(data);
   const result = userSchema.safeParse(data);
   return result.success ? null : result.error.errors.map(e => e.message).join(', ');
 };
